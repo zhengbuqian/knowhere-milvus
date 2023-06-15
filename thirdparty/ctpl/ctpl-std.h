@@ -21,7 +21,7 @@
 #define __ctpl_stl_thread_pool_H__
 
 #include <omp.h>
-#include "common/Log.h"
+#include "knowhere/common/Log.h"
 #include <functional>
 #include <thread>
 #include <atomic>
