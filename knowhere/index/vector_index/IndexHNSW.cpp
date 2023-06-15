@@ -231,6 +231,15 @@ IndexHNSW::Size() {
     return index_->cal_size();
 }
 
+// helper to return microsecond unix timestamp int64
+static int64_t
+get_current_time() {
+    auto now = std::chrono::system_clock::now();
+    auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    auto value = now_us.time_since_epoch();
+    return value.count() % 1000000;
+}
+
 void
 IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, int64_t* labels,
                      feder::hnsw::FederResultUniq& feder, const Config& config, const faiss::BitsetView bitset) {
@@ -249,6 +258,8 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
 
     std::vector<std::future<void>> futures;
     futures.reserve(n);
+    int64_t rand_id = rand() % 90000 + 10000;
+    LOG_KNOWHERE_DEBUG_ << rand_id << " HNSW start query, n = " << n << ", timestamp = " << get_current_time();
     for (unsigned int i = 0; i < n; ++i) {
         futures.push_back(pool_->push([&, index = i]() {
             auto single_query = xq + index * Dim();
@@ -270,10 +281,12 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
             }
         }));
     }
+    LOG_KNOWHERE_DEBUG_ << "HNSW pushed query, n = " << n << ", timestamp = " << get_current_time();
 
     for (auto& future : futures) {
         future.get();
     }
+    LOG_KNOWHERE_DEBUG_ << "HNSW finished query, n = " << n << ", timestamp = " << get_current_time();
 }
 
 void

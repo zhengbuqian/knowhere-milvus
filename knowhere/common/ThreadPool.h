@@ -42,6 +42,9 @@ class ThreadPool {
     uint32_t
     size() const noexcept;
 
+    uint32_t
+    n_idle() const noexcept;
+
     /**
      * @brief Set the threads number to the global thread pool of knowhere
      *

@@ -29,6 +29,11 @@ ThreadPool::size() const noexcept {
     return pool_->size();
 }
 
+uint32_t
+ThreadPool::n_idle() const noexcept {
+    return pool_->n_idle();
+}
+
 void
 ThreadPool::InitGlobalThreadPool(uint32_t num_threads) {
     if (num_threads <= 0) {
