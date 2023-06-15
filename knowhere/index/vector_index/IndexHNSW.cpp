@@ -258,8 +258,8 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
 
     std::vector<std::future<void>> futures;
     futures.reserve(n);
-    // int64_t rand_id = rand() % 90000 + 10000;
-    // LOG_KNOWHERE_DEBUG_ << rand_id << " HNSW start query, n = " << n << ", timestamp = " << get_current_time();
+    int64_t rand_id = rand() % 90000 + 10000;
+    LOG_KNOWHERE_DEBUG_ << rand_id << " HNSW start query, n = " << n << ", timestamp = " << get_current_time();
     for (unsigned int i = 0; i < n; ++i) {
         futures.push_back(pool_->push([&, index = i]() {
             auto single_query = xq + index * Dim();
