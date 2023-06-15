@@ -67,19 +67,15 @@ namespace ctpl {
                 std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
                 std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousPrintTime);
                 if (timeDifference.count() > 10) {
-                    printTime();
+                    LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
+                    for (int i = 0; i < 64; i++) {
+                        LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
+                    }
+                    valueTimes.resize(64, 0);
+                    totalTime = 0;
+                    LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
                     previousPrintTime = currentTime;
                 }
-            }
-
-            void printTime() {
-                LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
-                for (int i = 0; i < 64; i++) {
-                    LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
-                }
-                valueTimes.resize(64, 0);
-                totalTime = 0;
-                LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
             }
 
         private:
@@ -291,10 +287,14 @@ namespace ctpl {
                     // the queue is empty here, wait for the next command
                     std::unique_lock<std::mutex> lock(this->mutex);
                     ++this->nWaiting;
+                    LOG_KNOWHERE_INFO_ << "updating nWaiting";
                     this->tracker.updateValue(this->nWaiting);
+                    LOG_KNOWHERE_INFO_ << "done updating nWaiting";
                     this->cv.wait(lock, [this, &_f, &isPop, &_flag](){ isPop = this->q.pop(_f); return isPop || this->isDone || _flag; });
                     --this->nWaiting;
+                    LOG_KNOWHERE_INFO_ << "updating nWaiting again";
                     this->tracker.updateValue(this->nWaiting);
+                    LOG_KNOWHERE_INFO_ << "done updating nWaiting again";
                     if (!isPop)
                         return;  // if the queue is empty and this->isDone == true or *flag then return
                 }
