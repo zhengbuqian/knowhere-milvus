@@ -21,6 +21,7 @@
 #define __ctpl_stl_thread_pool_H__
 
 #include <omp.h>
+#include <chrono>
 #include "knowhere/common/Log.h"
 #include <functional>
 #include <thread>
@@ -43,6 +44,52 @@
 namespace ctpl {
 
     namespace detail {
+        class ValueTracker {
+        public:
+            ValueTracker() : previousValue(0), currentValue(0), previousTime(std::chrono::steady_clock::now()), previousPrintTime(std::chrono::steady_clock::now()), totalTime(0) {
+                valueTimes.resize(64, 0);
+            }
+
+            void updateValue(int newValue) {
+                std::unique_lock<std::mutex> lock(this->mutex);
+                if (newValue != currentValue) {
+                    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+                    std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousTime);
+                    totalTime += timeDifference.count();
+
+                    valueTimes[previousValue] += timeDifference.count();
+
+                    previousValue = currentValue;
+                    currentValue = newValue;
+                    previousTime = currentTime;
+                }
+                // printTime if previousPrintTime is more than 10 seconds ago
+                std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+                std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousPrintTime);
+                if (timeDifference.count() > 10) {
+                    printTime();
+                    previousPrintTime = currentTime;
+                }
+            }
+
+            void printTime() {
+                std::cout << "------------ Start ------ Time for each value:" << std::endl;
+                for (int i = 0; i < 64; i++) {
+                    std::cout << i << ": " << valueTimes[i] << " seconds" << std::endl;
+                }
+                std::cout << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
+            }
+
+        private:
+            int previousValue;
+            int currentValue;
+            std::chrono::steady_clock::time_point previousTime;
+            std::chrono::steady_clock::time_point previousPrintTime;
+            double totalTime;
+            std::vector<double> valueTimes;
+            std::mutex mutex;
+        };
+
         template <typename T>
         class Queue {
         public:
@@ -262,6 +309,8 @@ namespace ctpl {
         std::atomic<bool> isDone;
         std::atomic<bool> isStop;
         std::atomic<int> nWaiting;  // how many threads are waiting
+        detail::ValueTracker tracker;
+
 
         std::mutex mutex;
         std::condition_variable cv;
