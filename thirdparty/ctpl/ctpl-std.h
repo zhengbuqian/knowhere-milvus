@@ -289,8 +289,10 @@ namespace ctpl {
                     // the queue is empty here, wait for the next command
                     std::unique_lock<std::mutex> lock(this->mutex);
                     ++this->nWaiting;
+                    this->tracker.updateValue(this->nWaiting);
                     this->cv.wait(lock, [this, &_f, &isPop, &_flag](){ isPop = this->q.pop(_f); return isPop || this->isDone || _flag; });
                     --this->nWaiting;
+                    this->tracker.updateValue(this->nWaiting);
                     if (!isPop)
                         return;  // if the queue is empty and this->isDone == true or *flag then return
                 }
