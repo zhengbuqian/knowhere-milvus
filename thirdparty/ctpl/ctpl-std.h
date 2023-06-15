@@ -137,7 +137,7 @@ namespace ctpl {
         thread_pool(int nThreads) {
             this->init();
             this->resize(nThreads);
-            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << ;
+            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << 1;
             this->q.set_limit(1);
         }
 
