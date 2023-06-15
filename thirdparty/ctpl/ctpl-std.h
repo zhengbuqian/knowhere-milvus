@@ -88,8 +88,8 @@ namespace ctpl {
         thread_pool(int nThreads) {
             this->init();
             this->resize(nThreads);
-            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << nThreads + 2;
-            this->q.set_limit(nThreads + 2);
+            LOG_KNOWHERE_INFO_ << "thread_pool limit: " << 2;
+            this->q.set_limit(2);
         }
 
         // the destructor waits for all the functions in the queue to be finished
@@ -197,7 +197,6 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
-            LOG_KNOWHERE_INFO_ << "thread_pool push current idle threads: " << this->nWaiting;
             return pck->get_future();
         }
 
@@ -212,7 +211,6 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
-            LOG_KNOWHERE_INFO_ << "thread_pool push current idle threads: " << this->nWaiting;
             return pck->get_future();
         }
 
