@@ -51,7 +51,7 @@ namespace ctpl {
             }
 
             void updateValue(int newValue) {
-                std::unique_lock<std::mutex> lock(this->mutex);
+                std::unique_lock<std::mutex> lock(this->mu);
                 if (newValue != currentValue) {
                     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
                     std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousTime);
@@ -85,7 +85,7 @@ namespace ctpl {
             std::chrono::steady_clock::time_point previousPrintTime;
             double totalTime;
             std::vector<double> valueTimes;
-            std::mutex mutex;
+            std::mutex mu;
         };
 
         template <typename T>
