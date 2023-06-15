@@ -21,6 +21,7 @@
 #define __ctpl_stl_thread_pool_H__
 
 #include <functional>
+#include "knowhere/common/Log.h"
 #include <thread>
 #include <atomic>
 #include <vector>
@@ -47,6 +48,9 @@ namespace ctpl {
             bool push(T const & value) {
                 std::unique_lock<std::mutex> lock(this->mutex);
                 this->q.push(value);
+                if (this->q.size() >= this->limit_) {
+                    cv.wait(lock);
+                }
                 return true;
             }
             // deletes the retrieved element, do not use for non integral types
@@ -56,15 +60,23 @@ namespace ctpl {
                     return false;
                 v = this->q.front();
                 this->q.pop();
+
+                this->cv.notify_one();
                 return true;
             }
             bool empty() {
                 std::unique_lock<std::mutex> lock(this->mutex);
                 return this->q.empty();
             }
+            void
+            set_limit(uint32_t limit) {
+                limit_ = limit;
+            }
         private:
             std::queue<T> q;
             std::mutex mutex;
+            std::condition_variable cv;
+            uint32_t limit_ = 0;
         };
     }
 
@@ -73,7 +85,11 @@ namespace ctpl {
     public:
 
         thread_pool() { this->init(); }
-        thread_pool(int nThreads) { this->init(); this->resize(nThreads); }
+        thread_pool(int nThreads) {
+            this->init(); this->resize(nThreads);
+            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << nThreads + 2;
+            this->q.set_limit(nThreads + 2);
+        }
 
         // the destructor waits for all the functions in the queue to be finished
         ~thread_pool() {
@@ -180,6 +196,7 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
+            LOG_KNOWHERE_INFO_ << "thread_pool push current idle threads: " << this->nWaiting;
             return pck->get_future();
         }
 
@@ -194,6 +211,7 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
+            LOG_KNOWHERE_INFO_ << "thread_pool push current idle threads: " << this->nWaiting;
             return pck->get_future();
         }
 
@@ -233,7 +251,10 @@ namespace ctpl {
             this->threads[i].reset(new std::thread(f)); // compiler may not support std::make_unique()
         }
 
-        void init() { this->nWaiting = 0; this->isStop = false; this->isDone = false; }
+        void init() {
+            this->nWaiting = 0; this->isStop = false; this->isDone = false;
+            LOG_KNOWHERE_INFO_ << "thread_pool in ctpl initiating";
+        }
 
         std::vector<std::unique_ptr<std::thread>> threads;
         std::vector<std::shared_ptr<std::atomic<bool>>> flags;
