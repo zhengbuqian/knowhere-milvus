@@ -59,6 +59,7 @@ namespace ctpl {
 
                     valueTimes[previousValue] += timeDifference.count();
 
+
                     previousValue = currentValue;
                     currentValue = newValue;
                     previousTime = currentTime;
