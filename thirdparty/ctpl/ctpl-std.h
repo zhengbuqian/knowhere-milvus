@@ -73,7 +73,7 @@ namespace ctpl {
                         LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
                     }
                     LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
-                    valueTimes.resize(64, 0);
+                    std::fill(valueTimes.begin(), valueTimes.end(), 0);
                     totalTime = 0;
                     previousPrintTime = currentTime;
                 }
