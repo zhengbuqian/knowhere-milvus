@@ -73,7 +73,6 @@ namespace ctpl {
             }
 
             void printTime() {
-                std::unique_lock<std::mutex> lock(this->mutex);
                 LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
                 for (int i = 0; i < 64; i++) {
                     LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
@@ -138,8 +137,8 @@ namespace ctpl {
         thread_pool(int nThreads) {
             this->init();
             this->resize(nThreads);
-            LOG_KNOWHERE_INFO_ << "thread_pool limit: " << 2;
-            this->q.set_limit(2);
+            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << ;
+            this->q.set_limit(1);
         }
 
         // the destructor waits for all the functions in the queue to be finished
