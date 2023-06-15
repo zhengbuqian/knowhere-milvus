@@ -93,11 +93,8 @@ namespace ctpl {
         public:
             bool push(T const & value) {
                 std::unique_lock<std::mutex> lock(this->mutex);
-                LOG_KNOWHERE_INFO_ << "queue size: " << this->q.size() << " limit " << this->limit_;
                 if (this->q.size() >= this->limit_) {
-                    LOG_KNOWHERE_INFO_ << "5 waiting for queue limit";
                     cv.wait(lock);
-                    LOG_KNOWHERE_INFO_ << "6 done waiting for queue limit";
                 }
                 this->q.push(value);
                 return true;
@@ -236,7 +233,6 @@ namespace ctpl {
 
         template<typename F, typename... Rest>
         auto push(F && f, Rest&&... rest) ->std::future<decltype(f(0, rest...))> {
-            LOG_KNOWHERE_INFO_ << "7 pool push";
             auto pck = std::make_shared<std::packaged_task<decltype(f(0, rest...))(int)>>(
                 std::bind(std::forward<F>(f), std::placeholders::_1, std::forward<Rest>(rest)...)
                 );
@@ -246,7 +242,6 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
-            LOG_KNOWHERE_INFO_ << "7 pool done push";
             return pck->get_future();
         }
 
@@ -254,7 +249,6 @@ namespace ctpl {
         // operator returns std::future, where the user can get the result and rethrow the catched exceptins
         template<typename F>
         auto push(F && f) ->std::future<decltype(f(0))> {
-            LOG_KNOWHERE_INFO_ << "7 pool push";
             auto pck = std::make_shared<std::packaged_task<decltype(f(0))(int)>>(std::forward<F>(f));
             auto _f = new std::function<void(int id)>([pck](int id) {
                 (*pck)(id);
@@ -262,7 +256,6 @@ namespace ctpl {
             this->q.push(_f);
             std::unique_lock<std::mutex> lock(this->mutex);
             this->cv.notify_one();
-            LOG_KNOWHERE_INFO_ << "7 pool done push";
             return pck->get_future();
         }
 
@@ -294,14 +287,10 @@ namespace ctpl {
                     // the queue is empty here, wait for the next command
                     std::unique_lock<std::mutex> lock(this->mutex);
                     ++this->nWaiting;
-                    LOG_KNOWHERE_INFO_ << "1 updating nWaiting";
                     this->tracker.updateValue(this->nWaiting);
-                    LOG_KNOWHERE_INFO_ << "2 done updating nWaiting";
                     this->cv.wait(lock, [this, &_f, &isPop, &_flag](){ isPop = this->q.pop(_f); return isPop || this->isDone || _flag; });
                     --this->nWaiting;
-                    LOG_KNOWHERE_INFO_ << "3 updating nWaiting again";
                     this->tracker.updateValue(this->nWaiting);
-                    LOG_KNOWHERE_INFO_ << "4 done updating nWaiting again";
                     if (!isPop)
                         return;  // if the queue is empty and this->isDone == true or *flag then return
                 }
