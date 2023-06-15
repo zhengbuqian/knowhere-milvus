@@ -281,12 +281,12 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
             }
         }));
     }
-    LOG_KNOWHERE_DEBUG_ << "HNSW pushed query, n = " << n << ", timestamp = " << get_current_time();
+    LOG_KNOWHERE_DEBUG_ << rand_id << "HNSW pushed query, n = " << n << ", timestamp = " << get_current_time();
 
     for (auto& future : futures) {
         future.get();
     }
-    LOG_KNOWHERE_DEBUG_ << "HNSW finished query, n = " << n << ", timestamp = " << get_current_time();
+    LOG_KNOWHERE_DEBUG_ << rand_id << "HNSW finished query, n = " << n << ", timestamp = " << get_current_time();
 }
 
 void
