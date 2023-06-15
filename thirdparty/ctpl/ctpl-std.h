@@ -44,50 +44,50 @@
 namespace ctpl {
 
     namespace detail {
-        class ValueTracker {
-        public:
-            ValueTracker() : previousValue(0), currentValue(0), previousTime(std::chrono::steady_clock::now()), previousPrintTime(std::chrono::steady_clock::now()), totalTime(0) {
-                valueTimes.resize(64, 0);
-            }
+        // class ValueTracker {
+        // public:
+        //     ValueTracker() : previousValue(0), currentValue(0), previousTime(std::chrono::steady_clock::now()), previousPrintTime(std::chrono::steady_clock::now()), totalTime(0) {
+        //         valueTimes.resize(64, 0);
+        //     }
 
-            void updateValue(int newValue) {
-                std::unique_lock<std::mutex> lock(this->mu);
-                if (newValue != currentValue) {
-                    std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-                    std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousTime);
-                    totalTime += timeDifference.count();
+        //     void updateValue(int newValue) {
+        //         std::unique_lock<std::mutex> lock(this->mu);
+        //         if (newValue != currentValue) {
+        //             std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+        //             std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousTime);
+        //             totalTime += timeDifference.count();
 
-                    valueTimes[previousValue] += timeDifference.count();
+        //             valueTimes[previousValue] += timeDifference.count();
 
 
-                    previousValue = currentValue;
-                    currentValue = newValue;
-                    previousTime = currentTime;
-                }
-                // printTime if previousPrintTime is more than 10 seconds ago
-                std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-                std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousPrintTime);
-                if (timeDifference.count() > 10) {
-                    LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
-                    for (int i = 0; i < 64; i++) {
-                        LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
-                    }
-                    LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
-                    valueTimes.resize(64, 0);
-                    totalTime = 0;
-                    previousPrintTime = currentTime;
-                }
-            }
+        //             previousValue = currentValue;
+        //             currentValue = newValue;
+        //             previousTime = currentTime;
+        //         }
+        //         // printTime if previousPrintTime is more than 10 seconds ago
+        //         std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+        //         std::chrono::duration<double> timeDifference = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - previousPrintTime);
+        //         if (timeDifference.count() > 10) {
+        //             LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
+        //             for (int i = 0; i < 64; i++) {
+        //                 LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
+        //             }
+        //             LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
+        //             valueTimes.resize(64, 0);
+        //             totalTime = 0;
+        //             previousPrintTime = currentTime;
+        //         }
+        //     }
 
-        private:
-            int previousValue;
-            int currentValue;
-            std::chrono::steady_clock::time_point previousTime;
-            std::chrono::steady_clock::time_point previousPrintTime;
-            double totalTime;
-            std::vector<double> valueTimes;
-            std::mutex mu;
-        };
+        // private:
+        //     int previousValue;
+        //     int currentValue;
+        //     std::chrono::steady_clock::time_point previousTime;
+        //     std::chrono::steady_clock::time_point previousPrintTime;
+        //     double totalTime;
+        //     std::vector<double> valueTimes;
+        //     std::mutex mu;
+        // };
 
         template <typename T>
         class Queue {
@@ -288,10 +288,10 @@ namespace ctpl {
                     // the queue is empty here, wait for the next command
                     std::unique_lock<std::mutex> lock(this->mutex);
                     ++this->nWaiting;
-                    this->tracker.updateValue(this->nWaiting);
+                    // this->tracker.updateValue(this->nWaiting);
                     this->cv.wait(lock, [this, &_f, &isPop, &_flag](){ isPop = this->q.pop(_f); return isPop || this->isDone || _flag; });
                     --this->nWaiting;
-                    this->tracker.updateValue(this->nWaiting);
+                    // this->tracker.updateValue(this->nWaiting);
                     if (!isPop)
                         return;  // if the queue is empty and this->isDone == true or *flag then return
                 }
@@ -310,7 +310,7 @@ namespace ctpl {
         std::atomic<bool> isDone;
         std::atomic<bool> isStop;
         std::atomic<int> nWaiting;  // how many threads are waiting
-        detail::ValueTracker tracker;
+        // detail::ValueTracker tracker;
 
 
         std::mutex mutex;
