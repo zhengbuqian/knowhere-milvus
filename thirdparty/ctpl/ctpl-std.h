@@ -95,9 +95,9 @@ namespace ctpl {
         public:
             bool push(T const & value) {
                 std::unique_lock<std::mutex> lock(this->mutex);
-                if (this->q.size() >= this->limit_) {
-                    cv.wait(lock);
-                }
+                // if (this->q.size() >= this->limit_) {
+                //     cv.wait(lock);
+                // }
                 this->q.push(value);
                 return true;
             }
@@ -108,7 +108,7 @@ namespace ctpl {
                     return false;
                 v = this->q.front();
                 this->q.pop();
-                this->cv.notify_one();
+                // this->cv.notify_one();
                 return true;
             }
             bool empty() {
@@ -136,7 +136,7 @@ namespace ctpl {
             this->init();
             this->resize(nThreads);
             LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << 8 * nThreads;
-            this->q.set_limit(8 * nThreads);
+            // this->q.set_limit(8 * nThreads);
         }
 
         // the destructor waits for all the functions in the queue to be finished
