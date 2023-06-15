@@ -135,8 +135,8 @@ namespace ctpl {
         thread_pool(int nThreads) {
             this->init();
             this->resize(nThreads);
-            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << 1;
-            this->q.set_limit(1);
+            LOG_KNOWHERE_INFO_ << "thread_pool queue limit: " << nThreads;
+            this->q.set_limit(nThreads);
         }
 
         // the destructor waits for all the functions in the queue to be finished
