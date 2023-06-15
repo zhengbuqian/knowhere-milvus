@@ -250,6 +250,7 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
     std::vector<std::future<void>> futures;
     futures.reserve(n);
     for (unsigned int i = 0; i < n; ++i) {
+        LOG_KNOWHERE_INFO_ << "HNSW pushing";
         futures.push_back(pool_->push([&, index = i]() {
             auto single_query = xq + index * Dim();
             auto rst = index_->searchKnn(single_query, k, bitset, &param, feder);
@@ -269,6 +270,7 @@ IndexHNSW::QueryImpl(int64_t n, const float* xq, int64_t k, float* distances, in
                 p_single_id[idx] = -1;
             }
         }));
+        LOG_KNOWHERE_INFO_ << "HNSW pushed";
     }
 
     for (auto& future : futures) {
