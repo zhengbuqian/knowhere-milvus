@@ -58,7 +58,8 @@ ThreadPool::GetGlobalThreadPool() {
         }
     }
     static auto pool = std::make_shared<ThreadPool>(global_thread_pool_size_);
-    LOG_KNOWHERE_WARNING_ << "std::thread::hardware_concurrency() is " << std::thread::hardware_concurrency();
+    LOG_KNOWHERE_WARNING_ << "std::thread::hardware_concurrency() is " << std::thread::hardware_concurrency()
+                          << " global_thread_pool_size_ is " << global_thread_pool_size_;
     return pool;
 }
 }  // namespace knowhere

@@ -73,11 +73,11 @@ namespace ctpl {
             }
 
             void printTime() {
-                std::cout << "------------ Start ------ Time for each value:" << std::endl;
+                LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
                 for (int i = 0; i < 64; i++) {
-                    std::cout << i << ": " << valueTimes[i] << " seconds" << std::endl;
+                    LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
                 }
-                std::cout << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
+                LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
             }
 
         private:
