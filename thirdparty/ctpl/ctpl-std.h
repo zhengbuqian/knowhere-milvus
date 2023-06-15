@@ -73,10 +73,13 @@ namespace ctpl {
             }
 
             void printTime() {
+                std::unique_lock<std::mutex> lock(this->mutex);
                 LOG_KNOWHERE_INFO_ << "------------ Start ------ Time for each value:" << std::endl;
                 for (int i = 0; i < 64; i++) {
                     LOG_KNOWHERE_INFO_ << i << ": " << valueTimes[i] << " seconds" << std::endl;
                 }
+                valueTimes.resize(64, 0);
+                totalTime = 0;
                 LOG_KNOWHERE_INFO_ << "------------ End   ------ Total time: " << totalTime << " seconds" << std::endl;
             }
 
